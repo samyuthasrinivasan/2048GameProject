@@ -1,15 +1,32 @@
 import random
 from pynput import keyboard
 
+# need to fix this error
 
-#fix problem with adding all the numbers in a column - needs to only add directly above/below
+# [2, 2, 2, 2]
+# [8, 4, 4, 4]
+# [4, 2, 2, 2]
+# [0, 0, 0, 2]
+#
+# [0, 2, 0, 0]
+# [2, 2, 2, 0]
+# [8, 4, 4, 2]
+# [4, 2, 2, 8]
+
+# jumps a step by adding the 4 from the added 2s to the nearby 4
+# maybe try using python-equivalent tuple to store a boolean with the added value
+# check if its a sum, if not add it, if it is leave it be
+# sadly i need internet for this i suck at python lol
+# - samyutha, 08/11/2023
+
+
 def print_matrix():
-    for i in range(4):
-        print(matrix[i])
+    for j in range(4):
+        print(matrix[j])
     print("\n")
 
 
-def add_two():
+def add_two( ):
     x = random.randint(0, 3)
     y = random.randint(0, 3)
     while matrix[x][y] != 0:
@@ -18,46 +35,128 @@ def add_two():
     matrix[x][y] = 2
 
 
-def down(row, col):
-    sum = matrix[row][col]
-    for i in range(row):
-        if matrix[i][col] != 0:
-            if matrix[i][col] == matrix[row][col] or matrix[i][col] == 0:
-                sum += matrix[i][col]
-                matrix[i][col] = 0
+def set_below(row, col):
+    below = 0
+    while below == 0 and row < 3:
+        below = matrix[row + 1][col]
+        row += 1
+    return row
 
-    matrix[row][col] = 0
-    for i in range(4):
-        if matrix[3 - i][col] == 0:
-            matrix[3 - i][col] = sum
-            break;
+
+def set_above(row, col):
+    above = 0
+    while above == 0 and row > 0:
+        above = matrix[row - 1][col]
+        row -= 1
+    return row
+
+
+def down(row, col):
+    point = matrix[row][col]
+    sum = point
+    below = 0
+    above = 0
+
+    if row == 0:
+        selected_row_below = set_below(row, col)
+        below = matrix[selected_row_below][col]
+        above = 1
+
+    if row == 3:
+        selected_row_above = set_above(row, col)
+        above = matrix[selected_row_above][col]
+        below = 1
+
+    if row > 0 and row < 3:
+        selected_row_above = set_above(row, col)
+        selected_row_below = set_below(row, col)
+        above = matrix[selected_row_above][col]
+        below = matrix[selected_row_below][col]
+
+    if below == point:
+        sum += below
+        matrix[row][col] = 0
+        matrix[selected_row_below][col] = 0
+
+    else:
+        if above == point:
+            sum += above
+            matrix[row][col] = 0
+            matrix[selected_row_above][col] = 0
+
+        else:
+            matrix[row][col] = 0
+
+
+    iteratorRow = row
+    pointRow = row
+    while matrix[iteratorRow][col] == 0 & iteratorRow < 4:
+        pointRow = iteratorRow
+        iteratorRow += 1
+        if iteratorRow == 4:
+            break
+
+    matrix[pointRow][col] = sum
 
 
 def move_down():
+
     for r in range(4):
         for c in range(4):
-            if matrix[r][c] != 0:
-                row = r
-                col = c
-                down(row, col);
+            if matrix[3 - r][3 - c] != 0:
+                row = 3 - r
+                col = 3 - c
+                down(row, col)
 
     add_two()
     print_matrix()
 
 
 def up(row, col):
-    sum = matrix[row][col]
-    for i in range (row):
-        if matrix[i][col] != 0:
-            if matrix[i][col] == matrix[row][col] or matrix[i][col] == 0:
-                sum += matrix[i][col]
-                matrix[i][col] = 0
+    point = matrix[row][col]
+    sum = point
+    below = 0
+    above = 0
 
-    matrix[row][col] = 0
-    for i in range(4):
-        if matrix[i][col] == 0:
-            matrix[i][col] = sum
-            break;
+    if row == 0:
+        selected_row_below = set_below(row, col)
+        below = matrix[selected_row_below][col]
+        above = 1
+
+    if row == 3:
+        selected_row_above = set_above(row, col)
+        above = matrix[selected_row_above][col]
+        below = 1
+
+    if row > 0 and row < 3:
+        selected_row_above = set_above(row, col)
+        selected_row_below = set_below(row, col)
+        above = matrix[selected_row_above][col]
+        below = matrix[selected_row_below][col]
+
+    if above == point:
+        sum += above
+        matrix[row][col] = 0
+        matrix[selected_row_above][col] = 0
+
+    else:
+        if below == point:
+            sum += below
+            matrix[row][col] = 0
+            matrix[selected_row_below][col] = 0
+
+        else:
+            matrix[row][col] = 0
+
+    iteratorRow = row
+    pointRow = row
+    while matrix[iteratorRow][col] == 0 & iteratorRow > -1:
+        pointRow = iteratorRow
+        iteratorRow -= 1
+        if iteratorRow == -1:
+            break
+
+    matrix[pointRow][col] = sum
 
 
 def move_up():
@@ -66,11 +165,16 @@ def move_up():
             if matrix[r][c] != 0:
                row = r
                col = c
-               up(row, col);
+               up(row, col)
 
     add_two()
     print_matrix()
 
+def move_right(row, col):
+    sum = matrix[row][col]
+
+def move_left(row, col):
+    sum = matrix[row][col]
 
 print("2048!")
 matrix = []
@@ -82,18 +186,23 @@ y = random.randint(0, 3)
 matrix[y][x] = 2
 print_matrix()
 
-
-
-
-
-while(True):
+while True:
     def on_press(key):
         if key == keyboard.Key.up:
             move_up()
-            listener.stop();
+            listener.stop()
         if key == keyboard.Key.down:
             move_down()
-            listener.stop();
+            listener.stop()
+        if key == keyboard.Key.left:
+            move_left(1, 1)
+            listener.stop()
+        if key == keyboard.Key.right:
+            move_right(1, 1)
+            listener.stop()
+        if key == keyboard.Key.esc:
+            listener.stop()
+
     with keyboard.Listener(on_press=on_press) as listener:
         listener.join()
 
