@@ -14,11 +14,7 @@ from pynput import keyboard
 # [4, 2, 2, 8]
 
 # jumps a step by adding the 4 from the added 2s to the nearby 4
-# maybe try using python-equivalent tuple to store a boolean with the added value
 # check if its a sum, if not add it, if it is leave it be
-# sadly i need internet for this i suck at python lol
-# - samyutha, 08/11/2023
-
 
 def print_matrix():
     for j in range(4):
